@@ -29,7 +29,27 @@
 
 (define-data-var last-request-id uint u0)
 
-;; Helper function - return the minimum of two values
 (define-read-only (get-min (a uint) (b uint))
   (if (< a b) a b)
 )
+
+;; Configure resource allocation rules
+(define-public (set-allocation-params
+  (resource-id uint)
+  (min-allocation uint)
+  (max-allocation uint)
+  (conservation-percent uint))
+  (begin
+    (if (is-eq tx-sender CONTRACT-OWNER)
+        (if (or (> conservation-percent u100) (> min-allocation max-allocation))
+            ERR-INVALID-PARAMETER
+            (begin
+              (map-set resource-allocation-params
+                { resource-id: resource-id }
+                {
+                  min-allocation: min-allocation,
+                  max-allocation: max-allocation,
+                  conservation-percent: conservation-percent
+                })
+              (ok true)))
+        ERR-NOT-AUTHORIZED)))
