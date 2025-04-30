@@ -139,3 +139,15 @@
                     last-regeneration: block-height
                   })
                 (ok true)))))))
+
+(define-read-only (get-resource (resource-id uint))
+  (map-get? resources { resource-id: resource-id })
+)
+
+(define-read-only (get-allocation (resource-id uint))
+  (map-get? resource-allocations { resource-id: resource-id })
+)
+
+(define-read-only (get-user-rights (resource-id uint) (user principal))
+  (map-get? resource-rights { resource-id: resource-id, owner: user })
+)
