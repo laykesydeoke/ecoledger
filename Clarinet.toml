@@ -1,0 +1,19 @@
+[project]
+name = "ecoledger"
+authors = ["Lekan"]
+description = "EcoLedger creates a new paradigm for managing natural resources by combining blockchain's transparency with IoT data collection and democratic decision-making."
+telemetry = true
+requirements = []
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[repl.analysis]
+passes = ["check_checker"]
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
