@@ -106,3 +106,36 @@
               usage-reported: new-usage
             })
           (ok true)))))
+
+(define-public (regenerate-resource (resource-id uint))
+  (let (
+    (resource (map-get? resources { resource-id: resource-id }))
+  )
+    (if (is-none resource)
+        ERR-RESOURCE-NOT-FOUND
+        (let (
+          (data (unwrap! resource ERR-RESOURCE-NOT-FOUND))
+          (last (get last-regeneration data))
+          (rate (get regeneration-rate data))
+          (total (get total-capacity data))
+          (allocated (default-to { allocated: u0 }
+                        (map-get? resource-allocations { resource-id: resource-id })))
+        )
+          (if (<= block-height last)
+              ERR-TOO-SOON
+              (let (
+                (new-allocated (max u0 (- (get allocated allocated) rate)))
+              )
+                (map-set resource-allocations
+                  { resource-id: resource-id }
+                  { allocated: new-allocated })
+                (map-set resources
+                  { resource-id: resource-id }
+                  {
+                    name: (get name data),
+                    resource-type: (get resource-type data),
+                    total-capacity: total,
+                    regeneration-rate: rate,
+                    last-regeneration: block-height
+                  })
+                (ok true)))))))
