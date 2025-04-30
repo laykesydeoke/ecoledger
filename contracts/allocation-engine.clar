@@ -81,3 +81,17 @@
                   })
                 (ok true))))
         ERR-NOT-AUTHORIZED)))
+
+;; Read-only views
+
+(define-read-only (get-allocation-params (resource-id uint))
+  (map-get? resource-allocation-params { resource-id: resource-id })
+)
+
+(define-read-only (get-request (request-id uint))
+  (map-get? allocation-requests { request-id: request-id })
+)
+
+(define-read-only (get-last-request-id)
+  (var-get last-request-id)
+)
