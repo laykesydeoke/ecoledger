@@ -33,23 +33,29 @@
   (if (< a b) a b)
 )
 
-;; Configure resource allocation rules
-(define-public (set-allocation-params
-  (resource-id uint)
-  (min-allocation uint)
-  (max-allocation uint)
-  (conservation-percent uint))
-  (begin
-    (if (is-eq tx-sender CONTRACT-OWNER)
-        (if (or (> conservation-percent u100) (> min-allocation max-allocation))
-            ERR-INVALID-PARAMETER
-            (begin
-              (map-set resource-allocation-params
-                { resource-id: resource-id }
-                {
-                  min-allocation: min-allocation,
-                  max-allocation: max-allocation,
-                  conservation-percent: conservation-percent
-                })
-              (ok true)))
-        ERR-NOT-AUTHORIZED)))
+(define-public (request-allocation (resource-id uint) (amount uint))
+  (let (
+    (params (map-get? resource-allocation-params { resource-id: resource-id }))
+  )
+    (if (is-none params)
+        ERR-RESOURCE-NOT-FOUND
+        (let (
+          (data (unwrap! params ERR-RESOURCE-NOT-FOUND))
+          (min (get min-allocation data))
+          (max (get max-allocation data))
+        )
+          (if (or (< amount min) (> amount max))
+              ERR-INVALID-PARAMETER
+              (let (
+                (req-id (+ (var-get last-request-id) u1))
+              )
+                (var-set last-request-id req-id)
+                (map-set allocation-requests
+                  { request-id: req-id }
+                  {
+                    resource-id: resource-id,
+                    requestor: tx-sender,
+                    amount: amount,
+                    status: "pending"
+                  })
+                (ok req-id)))))))
