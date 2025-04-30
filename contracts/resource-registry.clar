@@ -7,8 +7,10 @@
 (define-constant ERR-ALLOCATION-EXCEEDED (err u502))
 (define-constant ERR-TOO-SOON (err u503))
 
+;; Contract owner
 (define-constant CONTRACT-OWNER tx-sender)
 
+;; Resource metadata
 (define-map resources
   { resource-id: uint }
   {
@@ -20,6 +22,7 @@
   }
 )
 
+;; Ownership and usage record
 (define-map resource-rights
   { resource-id: uint, owner: principal }
   {
@@ -28,6 +31,7 @@
   }
 )
 
+;; Total allocations record
 (define-map resource-allocations
   { resource-id: uint }
   {
@@ -35,6 +39,7 @@
   }
 )
 
+;; Register a new resource
 (define-public (register-resource
   (resource-id uint)
   (name (string-ascii 50))
@@ -59,6 +64,7 @@
           (ok true))
         ERR-NOT-AUTHORIZED)))
 
+;; Allocate a portion of a resource to a recipient
 (define-public (allocate-resource
   (resource-id uint)
   (recipient principal)
@@ -86,6 +92,7 @@
                   { allocated: new-total })
                 (ok true)))))))
 
+;; Report usage by resource owner
 (define-public (report-usage
   (resource-id uint)
   (amount-used uint))
@@ -107,6 +114,7 @@
             })
           (ok true)))))
 
+;; Regenerate available resources based on time passed
 (define-public (regenerate-resource (resource-id uint))
   (let (
     (resource (map-get? resources { resource-id: resource-id }))
@@ -140,14 +148,17 @@
                   })
                 (ok true)))))))
 
+;; View: Get full resource data
 (define-read-only (get-resource (resource-id uint))
   (map-get? resources { resource-id: resource-id })
 )
 
+;; View: Get total allocation for resource
 (define-read-only (get-allocation (resource-id uint))
   (map-get? resource-allocations { resource-id: resource-id })
 )
 
+;; View: Get user-specific rights
 (define-read-only (get-user-rights (resource-id uint) (user principal))
   (map-get? resource-rights { resource-id: resource-id, owner: user })
 )
