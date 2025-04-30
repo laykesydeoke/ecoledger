@@ -58,3 +58,30 @@
             { allocated: u0 })
           (ok true))
         ERR-NOT-AUTHORIZED)))
+
+(define-public (allocate-resource
+  (resource-id uint)
+  (recipient principal)
+  (amount uint))
+  (let (
+    (resource (map-get? resources { resource-id: resource-id }))
+    (allocation (default-to { allocated: u0 }
+                  (map-get? resource-allocations { resource-id: resource-id })))
+  )
+    (if (is-none resource)
+        ERR-RESOURCE-NOT-FOUND
+        (let (
+          (total-capacity (get total-capacity (unwrap! resource ERR-RESOURCE-NOT-FOUND)))
+          (already-allocated (get allocated allocation))
+          (new-total (+ already-allocated amount))
+        )
+          (if (> new-total total-capacity)
+              ERR-ALLOCATION-EXCEEDED
+              (begin
+                (map-set resource-rights
+                  { resource-id: resource-id, owner: recipient }
+                  { allocation-amount: amount, usage-reported: u0 })
+                (map-set resource-allocations
+                  { resource-id: resource-id }
+                  { allocated: new-total })
+                (ok true)))))))
