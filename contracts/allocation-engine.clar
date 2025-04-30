@@ -59,3 +59,25 @@
                     status: "pending"
                   })
                 (ok req-id)))))))
+
+(define-public (update-request-status (request-id uint) (new-status (string-ascii 20)))
+  (begin
+    (if (is-eq tx-sender CONTRACT-OWNER)
+        (let (
+          (req (map-get? allocation-requests { request-id: request-id }))
+        )
+          (if (is-none req)
+              ERR-RESOURCE-NOT-FOUND
+              (let (
+                (data (unwrap! req ERR-RESOURCE-NOT-FOUND))
+              )
+                (map-set allocation-requests
+                  { request-id: request-id }
+                  {
+                    resource-id: (get resource-id data),
+                    requestor: (get requestor data),
+                    amount: (get amount data),
+                    status: new-status
+                  })
+                (ok true))))
+        ERR-NOT-AUTHORIZED)))
