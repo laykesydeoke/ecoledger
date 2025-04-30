@@ -1,9 +1,12 @@
 [project]
 name = "ecoledger"
-authors = ["Lekan"]
-description = "EcoLedger creates a new paradigm for managing natural resources by combining blockchain's transparency with IoT data collection and democratic decision-making."
+authors = []
+description = ""
 telemetry = true
 requirements = []
+[contracts.resource-registry]
+path = "contracts/resource-registry.clar"
+depends_on = []
 
 [repl]
 costs_version = 2
