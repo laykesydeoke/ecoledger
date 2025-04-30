@@ -85,3 +85,24 @@
                   { resource-id: resource-id }
                   { allocated: new-total })
                 (ok true)))))))
+
+(define-public (report-usage
+  (resource-id uint)
+  (amount-used uint))
+  (let (
+    (rights (map-get? resource-rights { resource-id: resource-id, owner: tx-sender }))
+  )
+    (if (is-none rights)
+        ERR-NOT-AUTHORIZED
+        (let (
+          (data (unwrap! rights ERR-NOT-AUTHORIZED))
+          (current-usage (get usage-reported data))
+          (new-usage (+ current-usage amount-used))
+        )
+          (map-set resource-rights
+            { resource-id: resource-id, owner: tx-sender }
+            {
+              allocation-amount: (get allocation-amount data),
+              usage-reported: new-usage
+            })
+          (ok true)))))
